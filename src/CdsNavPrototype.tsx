@@ -1131,11 +1131,11 @@ const PageHeader = styled.header`
 `
 
 const PageHeading = styled.div`
-  /* Standard page title — Figma Body/Bold/xl: 18px Suisse Bold, 1.4 lh.
+  /* Standard page title — 16px Suisse Regular, 1.4 lh.
      Matches every other page title in the shell. */
   font-family: var(--cds-font-primary);
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 400;
   letter-spacing: 0;
   line-height: 1.4;
   margin: 0;
@@ -1718,8 +1718,8 @@ const MainHeader = styled.header`
 
 const PageTitle = styled.div`
   font-family: var(--cds-font-primary);
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 400;
   color: var(--cds-text-primary);
   margin: 0;
   line-height: 1.4;
