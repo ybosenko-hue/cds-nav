@@ -217,6 +217,14 @@ const CLOUD_ITEMS: NavItem[] = [
   { id: 'registry', label: 'Registry', icon: ContainerRegistry },
 ]
 
+/* Sub-tabs shown under the page title for each Cloud section. */
+const CLOUD_PAGE_TABS: Record<string, string[]> = {
+  compute: ['Instances', 'Instance Templates', 'Custom Images'],
+  orchestration: ['Kubernetes', 'Slurm'],
+  storage: ['Disks', 'Buckets'],
+  networking: ['VPC Networks', 'Subnets', 'Firewall Rules', 'Infiniband', 'Load Balancers'],
+}
+
 const FOUNDRY_TOP: NavItem[] = [
   { id: 'home', label: 'Home', icon: HomeIcon },
   { id: 'model-hub', label: 'Model Hub', icon: EdgeCluster },
@@ -355,8 +363,8 @@ export default function CdsNavPrototype() {
         'My Proprietary Models',
       ]
     }
-    if (!isAdmin && !isFoundry && cloudActive === 'orchestration') {
-      return ['Kubernetes', 'Slurm']
+    if (!isAdmin && !isFoundry && CLOUD_PAGE_TABS[cloudActive]) {
+      return CLOUD_PAGE_TABS[cloudActive]
     }
     return null
   }, [isAdmin, isFoundry, adminActive, foundryActive, cloudActive])
