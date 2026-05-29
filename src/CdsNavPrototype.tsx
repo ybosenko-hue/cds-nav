@@ -178,6 +178,7 @@ export default function CdsNavPrototype() {
   const [overlay, setOverlay] = useState<null | 'profile' | 'notifications' | 'projects'>(null)
   const [project, setProject] = useState<Project>('Staging')
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
+  const [collapsed, setCollapsed] = useState(false)
 
   const profileBtnRef = useRef<HTMLDivElement>(null)
   const profilePanelRef = useRef<HTMLDivElement>(null)
@@ -262,13 +263,31 @@ export default function CdsNavPrototype() {
   return (
     <Shell>
       <Global styles={tokens} />
-      <Sidebar>
-        <NavTop>
-          <RailIconBtn aria-label="Collapse navigation" role="button" tabIndex={0}>
+      <Sidebar data-collapsed={collapsed || undefined}>
+        <NavTop data-rail-nav-top="">
+          <RailIconBtn
+            aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'}
+            aria-pressed={collapsed}
+            role="button"
+            tabIndex={0}
+            onClick={() => {
+              setCollapsed((c) => !c)
+              setOverlay(null)
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                setCollapsed((c) => !c)
+                setOverlay(null)
+              }
+            }}
+          >
             <OpenPanelLeft size={16} />
           </RailIconBtn>
-          <CrusoeBadge product={isAdmin ? 'cloud' : (product as 'cloud' | 'foundry')} />
-          <ProductLabel>
+          <span data-rail-product-glyph="">
+            <CrusoeBadge product={isAdmin ? 'cloud' : (product as 'cloud' | 'foundry')} />
+          </span>
+          <ProductLabel data-rail-product-label="">
             {isAdmin
               ? 'Infrastructure Cloud'
               : isFoundry
@@ -277,7 +296,7 @@ export default function CdsNavPrototype() {
           </ProductLabel>
         </NavTop>
 
-        <SidebarBody>
+        <SidebarBody data-rail-body="">
           {isAdmin ? (
             <AdminNav activeId={adminActive} onSelect={setAdminActive} onBack={backToApp} />
           ) : isFoundry ? (
@@ -302,15 +321,20 @@ export default function CdsNavPrototype() {
         </SidebarBody>
 
         {isFoundry && (
-          <FoundryApiKeyWrap>
-            <GetApiKeyBtn role="button" tabIndex={0}>
+          <FoundryApiKeyWrap data-rail-api-pill-wrap="">
+            <GetApiKeyBtn
+              role="button"
+              tabIndex={0}
+              data-rail-api-pill=""
+              title="Get API Key"
+            >
               <Password size={16} />
-              <span>Get API Key</span>
+              <span data-rail-api-text="">Get API Key</span>
             </GetApiKeyBtn>
           </FoundryApiKeyWrap>
         )}
 
-        <SidebarBottom>
+        <SidebarBottom data-rail-bottom="">
           <UserPill
             ref={profileBtnRef}
             role="button"
@@ -325,9 +349,11 @@ export default function CdsNavPrototype() {
             aria-haspopup="menu"
             aria-expanded={overlay === 'profile'}
             data-open={overlay === 'profile' || undefined}
+            data-rail-user-pill=""
+            title="John Doe"
           >
             <AvatarSquare>J</AvatarSquare>
-            <UserName>John Doe</UserName>
+            <UserName data-rail-username="">John Doe</UserName>
           </UserPill>
           {!isFoundry && (
             <BellBtn
@@ -345,6 +371,7 @@ export default function CdsNavPrototype() {
               aria-haspopup="dialog"
               aria-expanded={overlay === 'notifications'}
               data-open={overlay === 'notifications' || undefined}
+              data-rail-bell=""
             >
               <NotificationCarbonIcon size={18} />
             </BellBtn>
@@ -426,7 +453,7 @@ function CloudNav(props: {
         active={activeId === 'command-center'}
         onClick={() => onSelect('command-center')}
       />
-      <RailDivider />
+      <RailDivider data-rail-divider="" />
       <ProjectSelectorRow ref={projectBtnRef} project={project} onClick={onProjectClick} />
       <Spacer h={8} />
       {CLOUD_ITEMS.map((item) => (
@@ -487,7 +514,7 @@ function FoundryNav(props: {
         />
       ))}
       <Spacer h={8} />
-      <RailDivider />
+      <RailDivider data-rail-divider="" />
       <Spacer h={4} />
       <SidebarRow label="Admin" icon={SettingsServices} onClick={onAdminClick} />
     </>
@@ -539,16 +566,18 @@ function SidebarRow(props: {
         }
       }}
       data-active={active || undefined}
+      data-rail-row=""
       aria-current={active ? 'page' : undefined}
+      title={label}
     >
       <Icon size={16} />
-      <RailRowLabel>{label}</RailRowLabel>
+      <RailRowLabel data-rail-label="">{label}</RailRowLabel>
     </RailRow>
   )
 }
 
 function GroupHeading({ children }: { children: ReactNode }) {
-  return <RailGroupHeading>{children}</RailGroupHeading>
+  return <RailGroupHeading data-rail-group-heading="">{children}</RailGroupHeading>
 }
 
 const Spacer = styled.div<{ h: number }>`
@@ -572,15 +601,17 @@ const ProjectSelectorRow = forwardRef<
           onClick()
         }
       }}
+      data-rail-project-row=""
+      title={project}
     >
       <ProjectAvatar>{project[0]}</ProjectAvatar>
       {twoLine ? (
-        <ProjectTwoLine>
+        <ProjectTwoLine data-rail-two-line="">
           <ProjectLabelSmall>Project</ProjectLabelSmall>
           <ProjectName>{project}</ProjectName>
         </ProjectTwoLine>
       ) : (
-        <ProjectName>{project}</ProjectName>
+        <ProjectName data-rail-project-name="">{project}</ProjectName>
       )}
       <ChevronSort size={16} />
     </ProjectRow>
@@ -953,6 +984,86 @@ const Sidebar = styled.aside`
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  transition: width 180ms cubic-bezier(0.4, 0, 0.2, 1),
+    min-width 180ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Collapsed state: icons only, 56px rail ─────────────────── */
+  &[data-collapsed] {
+    --cds-rail-width: 56px;
+
+    /* Top product row: only the toggle stays visible */
+    [data-rail-nav-top] {
+      padding: 16px 0 12px;
+      gap: 0;
+      justify-content: center;
+    }
+    [data-rail-product-glyph],
+    [data-rail-product-label],
+    [data-rail-label],
+    [data-rail-group-heading],
+    [data-rail-divider],
+    [data-rail-two-line],
+    [data-rail-project-name],
+    [data-rail-username],
+    [data-rail-api-text] {
+      display: none !important;
+    }
+
+    /* Body padding tightens, all items center on the icon */
+    [data-rail-body] {
+      padding: 8px 8px;
+      gap: 4px;
+    }
+
+    /* Center icons in rows */
+    [data-rail-row] {
+      justify-content: center;
+      gap: 0;
+      width: 40px;
+      margin: 0 auto;
+      padding: 0;
+    }
+
+    /* Bottom user area: stack avatar above bell, both centered */
+    [data-rail-bottom] {
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px 4px 16px;
+      align-items: center;
+    }
+    [data-rail-user-pill] {
+      flex: 0 0 auto;
+      padding: 0;
+      justify-content: center;
+    }
+    [data-rail-bell] {
+      margin-left: 0;
+    }
+
+    /* Foundry "Get API Key" pill collapses to a circle */
+    [data-rail-api-pill-wrap] {
+      padding: 0 8px 8px;
+      display: flex;
+      justify-content: center;
+    }
+    [data-rail-api-pill] {
+      width: 40px;
+      padding: 0;
+      justify-content: center;
+    }
+
+    /* Project selector row: avatar only, no chevron */
+    [data-rail-project-row] {
+      justify-content: center;
+      padding: 0;
+      gap: 0;
+      width: 40px;
+      margin: 0 auto;
+    }
+    [data-rail-project-row] > svg {
+      display: none;
+    }
+  }
 `
 
 const NavTop = styled.div`
@@ -1680,7 +1791,8 @@ const NotifFooterBtn = styled.div`
 
 const ProjectPanelWrap = styled.div`
   position: absolute;
-  left: 200px;
+  /* Anchor to the right edge of the rail so it tracks collapse/expand. */
+  left: calc(var(--cds-rail-width) - 12px);
   top: 88px;
   width: 400px;
   z-index: 100;
@@ -1693,6 +1805,15 @@ const ProjectPanelWrap = styled.div`
   overflow: hidden;
   &[data-foundry] {
     top: 52px;
+  }
+  /* When the rail is collapsed the project avatar sits in a different
+     vertical slot — pin the panel to the avatar's row. */
+  aside[data-collapsed] & {
+    left: var(--cds-rail-width);
+    top: 92px;
+  }
+  aside[data-collapsed] &[data-foundry] {
+    top: 56px;
   }
 `
 
