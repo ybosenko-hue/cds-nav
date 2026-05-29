@@ -51,6 +51,7 @@ import {
   Rocket,
   ChartCustom,
   Ai,
+  Add,
 } from '@carbon/icons-react'
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -404,23 +405,29 @@ export default function CdsNavPrototype() {
       </Sidebar>
 
       <MainArea>
-        <MainHeader>
-          <PageTitle>{pageTitle}</PageTitle>
-        </MainHeader>
-        {titleTabs && (
-          <TabsRow>
-            {titleTabs.map((label, i) => (
-              <TabBtn
-                key={label}
-                role="button"
-                tabIndex={0}
-                onClick={() => setTabActive(i)}
-                data-active={tabActive === i || undefined}
-              >
-                {label}
-              </TabBtn>
-            ))}
-          </TabsRow>
+        {!isAdmin && !isFoundry && cloudActive === 'command-center' ? (
+          <CommandCenterPage />
+        ) : (
+          <>
+            <MainHeader>
+              <PageTitle>{pageTitle}</PageTitle>
+            </MainHeader>
+            {titleTabs && (
+              <TabsRow>
+                {titleTabs.map((label, i) => (
+                  <TabBtn
+                    key={label}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setTabActive(i)}
+                    data-active={tabActive === i || undefined}
+                  >
+                    {label}
+                  </TabBtn>
+                ))}
+              </TabsRow>
+            )}
+          </>
         )}
 
         {overlay === 'notifications' && (
@@ -961,6 +968,280 @@ function ProjectSelectorPanel({
     </ProjectMenu>
   )
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+ *  Command Center → Infrastructure Overview page
+ *
+ *  Implementation of Figma node 6928:1948 from the Command Center file.
+ *  Layout, type, and spacing match the Figma; colors are translated to the
+ *  prototype's dark-theme tokens so the page composes with the rest of
+ *  the shell instead of dropping in a light surface.
+ * ────────────────────────────────────────────────────────────────────── */
+function CommandCenterPage() {
+  return (
+    <PageScroll>
+      <PageHeader>
+        <PageHeading>Infrastructure Overview</PageHeading>
+      </PageHeader>
+
+      {/* Install Crusoe MCP banner */}
+      <InstallBanner>
+        <InstallBannerText>Install Crusoe MCP</InstallBannerText>
+        <InstallBannerBtn role="button" tabIndex={0}>
+          Install
+        </InstallBannerBtn>
+      </InstallBanner>
+
+      {/* Stat cards */}
+      <StatCardRow>
+        <StatCard>
+          <StatCardValue>0</StatCardValue>
+          <StatCardLabel>Total Active Instances (VMs + CMK Nodes)</StatCardLabel>
+        </StatCard>
+        <StatCardDivider />
+        <StatCard>
+          <StatCardValue>0</StatCardValue>
+          <StatCardLabel>Total CPUs</StatCardLabel>
+        </StatCard>
+      </StatCardRow>
+
+      {/* Resource table */}
+      <ResourceTable>
+        <ResourceTableHeader>
+          <ResourceCol>Instance type</ResourceCol>
+          <ResourceCol>Instances</ResourceCol>
+          <ResourceCol>Utilization</ResourceCol>
+          <ResourceCol>Instance health</ResourceCol>
+        </ResourceTableHeader>
+        <ResourceTableEmpty>
+          <ResourceEmptyLabel>No resources</ResourceEmptyLabel>
+          <ResourceEmptyActions>
+            <PrimaryBtn role="button" tabIndex={0}>
+              <Add size={16} />
+              <span>Create Cluster</span>
+            </PrimaryBtn>
+            <SecondaryBtn role="button" tabIndex={0}>
+              <Add size={16} />
+              <span>Create Instance</span>
+            </SecondaryBtn>
+          </ResourceEmptyActions>
+        </ResourceTableEmpty>
+      </ResourceTable>
+    </PageScroll>
+  )
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+ *  Command Center styles
+ * ══════════════════════════════════════════════════════════════════════ */
+const PageScroll = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0;
+`
+
+const PageHeader = styled.header`
+  display: flex;
+  align-items: center;
+  height: 48px;
+  padding: 16px 4px 0;
+`
+
+const PageHeading = styled.div`
+  /* Figma Headline/h3 — 32px mono, -2 letter-spacing, 1.25 line-height. */
+  font-family: var(--cds-font-mono);
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: -2px;
+  line-height: 1.25;
+  margin: 0;
+  color: var(--cds-text-primary);
+`
+
+const InstallBanner = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+  padding: 0 16px;
+  background: var(--cds-bg-panel);
+  border: 1px solid var(--cds-border);
+  border-radius: var(--cds-radius-md);
+`
+
+const InstallBannerText = styled.span`
+  font-family: var(--cds-font-primary);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--cds-text-primary);
+  line-height: 1.3;
+`
+
+const InstallBannerBtn = styled.div`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  padding: 0 12px;
+  background: var(--cds-text-primary);
+  color: #111;
+  border-radius: var(--cds-radius-md);
+  font-family: var(--cds-font-primary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 120ms ease, transform 80ms ease;
+  &:hover {
+    background: #e9ecef;
+  }
+  &:active {
+    transform: scale(0.98);
+  }
+`
+
+const StatCardRow = styled.div`
+  display: flex;
+  align-items: stretch;
+  height: 160px;
+  background: var(--cds-bg-panel);
+  border: 1px solid var(--cds-border);
+  border-radius: var(--cds-radius-md);
+`
+
+const StatCard = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px;
+  min-width: 0;
+`
+
+const StatCardValue = styled.div`
+  font-family: var(--cds-font-mono);
+  font-size: 48px;
+  font-weight: 400;
+  letter-spacing: -2px;
+  line-height: 1;
+  color: var(--cds-text-primary);
+  font-variant-numeric: tabular-nums;
+`
+
+const StatCardLabel = styled.div`
+  font-family: var(--cds-font-primary);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--cds-text-primary);
+  line-height: 1.3;
+`
+
+const StatCardDivider = styled.div`
+  width: 1px;
+  background: var(--cds-border);
+`
+
+const ResourceTable = styled.div`
+  display: flex;
+  flex-direction: column;
+  background: var(--cds-bg-panel);
+  border: 1px solid var(--cds-border);
+  border-radius: var(--cds-radius-md);
+  overflow: hidden;
+`
+
+const ResourceTableHeader = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  align-items: center;
+  height: 36px;
+  padding: 0 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--cds-border);
+  font-family: var(--cds-font-primary);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--cds-text-secondary);
+`
+
+const ResourceCol = styled.div`
+  text-align: left;
+`
+
+const ResourceTableEmpty = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 32px 24px;
+  min-height: 166px;
+`
+
+const ResourceEmptyLabel = styled.div`
+  font-family: var(--cds-font-primary);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--cds-text-secondary);
+`
+
+const ResourceEmptyActions = styled.div`
+  display: flex;
+  gap: 12px;
+`
+
+const PrimaryBtn = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 16px;
+  background: var(--cds-text-primary);
+  color: #111;
+  border-radius: var(--cds-radius-md);
+  font-family: var(--cds-font-primary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 120ms ease, transform 80ms ease;
+  & svg {
+    color: #111;
+  }
+  &:hover {
+    background: #e9ecef;
+  }
+  &:active {
+    transform: scale(0.98);
+  }
+`
+
+const SecondaryBtn = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 16px;
+  background: transparent;
+  color: var(--cds-text-primary);
+  border: 1px solid var(--cds-border);
+  border-radius: var(--cds-radius-md);
+  font-family: var(--cds-font-primary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 120ms ease, transform 80ms ease;
+  & svg {
+    color: var(--cds-icon-primary);
+  }
+  &:hover {
+    background: var(--cds-bg-item-hover-strong);
+  }
+  &:active {
+    transform: scale(0.98);
+  }
+`
 
 /* ══════════════════════════════════════════════════════════════════════
  *  Styled primitives (div-based to keep the layout dark-theme prototype)
