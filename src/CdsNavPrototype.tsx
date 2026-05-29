@@ -314,8 +314,11 @@ export default function CdsNavPrototype() {
         'My Proprietary Models',
       ]
     }
+    if (!isAdmin && !isFoundry && cloudActive === 'orchestration') {
+      return ['Kubernetes', 'Slurm']
+    }
     return null
-  }, [isAdmin, isFoundry, adminActive, foundryActive])
+  }, [isAdmin, isFoundry, adminActive, foundryActive, cloudActive])
 
   const [tabActive, setTabActive] = useState(0)
   useEffect(() => {
@@ -1123,17 +1126,18 @@ const PageScroll = styled.div`
 const PageHeader = styled.header`
   display: flex;
   align-items: center;
-  height: 48px;
-  padding: 16px 4px 0;
+  height: 32px;
+  padding-left: 4px;
 `
 
 const PageHeading = styled.div`
-  /* Figma Headline/h3 — 32px mono, -2 letter-spacing, 1.25 line-height. */
-  font-family: var(--cds-font-mono);
-  font-size: 32px;
-  font-weight: 400;
-  letter-spacing: -2px;
-  line-height: 1.25;
+  /* Standard page title — Figma Body/Bold/xl: 18px Suisse Bold, 1.4 lh.
+     Matches every other page title in the shell. */
+  font-family: var(--cds-font-primary);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.4;
   margin: 0;
   color: var(--cds-text-primary);
 `
