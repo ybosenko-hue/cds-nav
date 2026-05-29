@@ -3,7 +3,7 @@
 Pixel-perfect prototype of the Crusoe **CDS Navigation — May 27 Final** Figma:
 [`Crusoe Design System → Navigation - May 27 Final revision`](https://www.figma.com/design/Ddl1SvLNSOJlp3dcIsql9i/Crusoe-Design-System--CDS-?node-id=19577-131).
 
-Live: **https://YBosenko.github.io/cds-nav/** _(replace `YBosenko` with your GitHub username once Pages is enabled)_
+Live: **https://ybosenko-hue.github.io/cds-nav/**
 
 ## What's inside
 
