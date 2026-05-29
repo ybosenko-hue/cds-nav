@@ -60,6 +60,14 @@ import {
  *  design system). Sourced from Figma variables on node 19577-131.
  * ────────────────────────────────────────────────────────────────────── */
 const tokens = css`
+  /* Border-box everywhere so width + padding compose predictably
+     (e.g. dropdown items sized with calc(100% - margin) + padding). */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
   /* ── Shared (theme-independent) + DARK defaults ──────────────────────
      :root carries the dark palette so the app renders dark before any
      theme attribute is applied (matches index.html's initial bg). The
