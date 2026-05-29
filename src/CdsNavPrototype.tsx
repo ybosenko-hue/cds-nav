@@ -15,6 +15,7 @@
  * properties. This mirrors the existing NewNav prototype pattern in the repo.
  */
 import { useState, useRef, useEffect, useMemo, forwardRef, type ReactNode } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import styled from '@emotion/styled'
 import { Global, css } from '@emotion/react'
 import {
@@ -249,16 +250,56 @@ type Project = (typeof PROJECTS)[number]
  *  Root component
  * ══════════════════════════════════════════════════════════════════════ */
 export default function CdsNavPrototype() {
-  const [product, setProduct] = useState<Product>('cloud')
-  const [cloudActive, setCloudActive] = useState<NavId>('command-center')
-  const [foundryActive, setFoundryActive] = useState<NavId>('model-hub')
-  const [adminActive, setAdminActive] = useState<NavId>('usage')
-  const [prevProduct, setPrevProduct] = useState<Exclude<Product, 'admin'>>('cloud')
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  /* ── URL is the source of truth for product + active page ──────────────
+     basename="/cds-nav" is stripped, so pathname is e.g. "/", "/compute",
+     "/foundry/model-hub", "/admin/usage". */
+  const { product, cloudActive, foundryActive, adminActive } = useMemo(() => {
+    const seg = location.pathname.split('/').filter(Boolean)
+    if (seg[0] === 'admin') {
+      return {
+        product: 'admin' as Product,
+        cloudActive: 'command-center',
+        foundryActive: 'model-hub',
+        adminActive: seg[1] ?? 'usage',
+      }
+    }
+    if (seg[0] === 'foundry') {
+      return {
+        product: 'foundry' as Product,
+        cloudActive: 'command-center',
+        foundryActive: seg[1] ?? 'model-hub',
+        adminActive: 'usage',
+      }
+    }
+    return {
+      product: 'cloud' as Product,
+      cloudActive: seg[0] ?? 'command-center',
+      foundryActive: 'model-hub',
+      adminActive: 'usage',
+    }
+  }, [location.pathname])
+
+  // Remember the last non-admin path so "Back to app" returns to it.
+  const prevAppPathRef = useRef<string>('/command-center')
+  useEffect(() => {
+    if (product !== 'admin') {
+      prevAppPathRef.current = location.pathname === '/' ? '/command-center' : location.pathname
+    }
+  }, [location.pathname, product])
 
   const [overlay, setOverlay] = useState<null | 'profile' | 'notifications' | 'projects'>(null)
   const [project, setProject] = useState<Project>('Staging')
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   const [collapsed, setCollapsed] = useState(false)
+
+  // Navigate + close any open overlay in one go.
+  const go = (path: string) => {
+    navigate(path)
+    setOverlay(null)
+  }
 
   const profileBtnRef = useRef<HTMLDivElement>(null)
   const profilePanelRef = useRef<HTMLDivElement>(null)
@@ -325,23 +366,13 @@ export default function CdsNavPrototype() {
     setTabActive(0)
   }, [pageTitle])
 
-  const openAdmin = () => {
-    if (product !== 'admin') setPrevProduct(product)
-    setProduct('admin')
-    setOverlay(null)
-  }
-  const backToApp = () => {
-    setProduct(prevProduct)
-    setOverlay(null)
-  }
-  const switchToCloud = () => {
-    setProduct('cloud')
-    setOverlay(null)
-  }
-  const switchToFoundry = () => {
-    setProduct('foundry')
-    setOverlay(null)
-  }
+  const selectCloud = (id: NavId) => go(`/${id}`)
+  const selectFoundry = (id: NavId) => go(`/foundry/${id}`)
+  const selectAdmin = (id: NavId) => go(`/admin/${id}`)
+  const openAdmin = () => go('/admin/usage')
+  const backToApp = () => go(prevAppPathRef.current)
+  const switchToCloud = () => go('/command-center')
+  const switchToFoundry = () => go('/foundry/model-hub')
 
   return (
     <Shell data-cds-theme={theme}>
@@ -381,11 +412,11 @@ export default function CdsNavPrototype() {
 
         <SidebarBody data-rail-body="">
           {isAdmin ? (
-            <AdminNav activeId={adminActive} onSelect={setAdminActive} onBack={backToApp} />
+            <AdminNav activeId={adminActive} onSelect={selectAdmin} onBack={backToApp} />
           ) : isFoundry ? (
             <FoundryNav
               activeId={foundryActive}
-              onSelect={setFoundryActive}
+              onSelect={selectFoundry}
               project={project}
               onProjectClick={() => setOverlay(overlay === 'projects' ? null : 'projects')}
               projectBtnRef={projectBtnRef}
@@ -394,7 +425,7 @@ export default function CdsNavPrototype() {
           ) : (
             <CloudNav
               activeId={cloudActive}
-              onSelect={setCloudActive}
+              onSelect={selectCloud}
               project={project}
               onProjectClick={() => setOverlay(overlay === 'projects' ? null : 'projects')}
               projectBtnRef={projectBtnRef}

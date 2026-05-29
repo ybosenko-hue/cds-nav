@@ -12,6 +12,26 @@
       html, body, #root { margin: 0; height: 100%; }
       body { background: #0a0a0a; }
     </style>
+    <!--
+      GitHub Pages SPA fallback decoder. Pairs with public/404.html: if the
+      page was reached via a deep link (URL looks like /cds-nav/?/orchestration),
+      rewrite it back to /cds-nav/orchestration before React/router mount so
+      BrowserRouter resolves the intended route. No-op for normal loads.
+    -->
+    <script>
+      ;(function (l) {
+        if (l.search[1] === '/') {
+          var decoded = l.search
+            .slice(1)
+            .split('&')
+            .map(function (s) {
+              return s.replace(/~and~/g, '&')
+            })
+            .join('?')
+          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash)
+        }
+      })(window.location)
+    </script>
   </head>
   <body>
     <div id="root"></div>
