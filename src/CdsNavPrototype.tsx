@@ -59,10 +59,20 @@ import {
  *  design system). Sourced from Figma variables on node 19577-131.
  * ────────────────────────────────────────────────────────────────────── */
 const tokens = css`
+  /* ── Shared (theme-independent) + DARK defaults ──────────────────────
+     :root carries the dark palette so the app renders dark before any
+     theme attribute is applied (matches index.html's initial bg). The
+     light palette below overrides under [data-cds-theme='light']. */
   :root {
     --cds-font-primary: 'Suisse Intl', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --cds-font-mono: 'ABC Diatype Mono', 'SF Mono', 'Monaco', 'Consolas', monospace;
 
+    --cds-rail-width: 212px;
+    --cds-row-height: 32px;
+    --cds-radius-md: 8px;
+    --cds-radius-lg: 12px;
+
+    /* surfaces */
     --cds-bg-page: #0a0a0a;
     --cds-bg-sidebar: #0a0a0a;
     --cds-bg-panel: #161616;
@@ -74,19 +84,25 @@ const tokens = css`
     --cds-bg-product-tile: #1d1e1f;
     --cds-bg-product-tile-hover: #222324;
     --cds-bg-product-tile-active: #28292a;
+    --cds-table-header-bg: rgba(255, 255, 255, 0.02);
 
+    /* borders */
     --cds-border: #343a40;
     --cds-border-subtle: #1f2326;
 
+    /* text */
     --cds-text-primary: #ffffff;
     --cds-text-secondary: #adb5bd;
     --cds-text-tertiary: #868e96;
     --cds-text-muted: #565859;
 
+    /* icons */
     --cds-icon-primary: #f8f9fa;
     --cds-icon-secondary: #ced4da;
 
+    /* brand + status */
     --cds-hi-vis: #ceeb13;
+    --cds-accent-tint: rgba(206, 235, 19, 0.08);
     --cds-positive: #acc695;
     --cds-positive-bg: #242a1f;
     --cds-positive-border: #607c48;
@@ -95,14 +111,77 @@ const tokens = css`
     --cds-negative: #e86958;
     --cds-negative-bg: #680c00;
     --cds-negative-text: #f3b4ab;
+    --cds-warning: #d3a13b;
     --cds-warning-bg: #5a4800;
     --cds-warning-text: #ffeea9;
     --cds-pill-neutral-bg: #343a40;
 
-    --cds-rail-width: 212px;
-    --cds-row-height: 32px;
-    --cds-radius-md: 8px;
-    --cds-radius-lg: 12px;
+    /* semantic helpers (theme-flipping so primary buttons never break) */
+    --cds-btn-primary-bg: #ffffff;
+    --cds-btn-primary-text: #111111;
+    --cds-btn-primary-hover-bg: #e9ecef;
+    --cds-shadow-panel: 0px 2px 24px 0px rgba(0, 0, 0, 0.5);
+    --cds-focus-ring: var(--cds-hi-vis);
+  }
+
+  /* ── LIGHT palette ───────────────────────────────────────────────────
+     Analyzed from Cursor + Linear: soft-gray chrome against white content,
+     hairline borders, near-black text, translucent-black hover, and solid
+     black primary buttons. Status hues use Crusoe-DS light values
+     (negative #b41f0b etc.) and the lime is deepened to #6b7700 so it stays
+     legible as text/lines/the Foundry glyph on white — legibility over the
+     raw neon, by intent. */
+  [data-cds-theme='light'] {
+    /* surfaces */
+    --cds-bg-page: #ffffff;
+    --cds-bg-sidebar: #f8f9fa;
+    --cds-bg-panel: #ffffff;
+    --cds-bg-panel-elevated: #f1f3f5;
+    --cds-bg-item-active: #e9ecef;
+    --cds-bg-item-hover: rgba(17, 17, 17, 0.04);
+    --cds-bg-item-hover-strong: rgba(17, 17, 17, 0.06);
+    --cds-bg-avatar: #dee2e6;
+    --cds-bg-product-tile: #ffffff;
+    --cds-bg-product-tile-hover: #f1f3f5;
+    --cds-bg-product-tile-active: #e9ecef;
+    --cds-table-header-bg: #f8f9fa;
+
+    /* borders */
+    --cds-border: #dee2e6;
+    --cds-border-subtle: #eef0f2;
+
+    /* text */
+    --cds-text-primary: #111111;
+    --cds-text-secondary: #495057;
+    --cds-text-tertiary: #868e96;
+    --cds-text-muted: #adb5bd;
+
+    /* icons */
+    --cds-icon-primary: #111111;
+    --cds-icon-secondary: #495057;
+
+    /* brand + status */
+    --cds-hi-vis: #6b7700;
+    --cds-accent-tint: rgba(107, 119, 0, 0.1);
+    --cds-positive: #4c6b2c;
+    --cds-positive-bg: #eef6e3;
+    --cds-positive-border: #a3c585;
+    --cds-positive-pill-bg: #e6f0d6;
+    --cds-positive-pill-text: #3f5d1f;
+    --cds-negative: #b41f0b;
+    --cds-negative-bg: #fce8e6;
+    --cds-negative-text: #b41f0b;
+    --cds-warning: #9a6b00;
+    --cds-warning-bg: #fdf2cf;
+    --cds-warning-text: #7a5c00;
+    --cds-pill-neutral-bg: #e9ecef;
+
+    /* semantic helpers */
+    --cds-btn-primary-bg: #111111;
+    --cds-btn-primary-text: #ffffff;
+    --cds-btn-primary-hover-bg: #2b2b2b;
+    --cds-shadow-panel: 0px 8px 24px rgba(16, 24, 40, 0.12),
+      0px 1px 2px rgba(16, 24, 40, 0.06);
   }
 
   @keyframes cdsPanelIn {
@@ -262,7 +341,7 @@ export default function CdsNavPrototype() {
   }
 
   return (
-    <Shell>
+    <Shell data-cds-theme={theme}>
       <Global styles={tokens} />
       <Sidebar data-collapsed={collapsed || undefined}>
         <NavTop data-rail-nav-top="">
@@ -1084,8 +1163,8 @@ const InstallBannerBtn = styled.div`
   justify-content: center;
   height: 24px;
   padding: 0 12px;
-  background: var(--cds-text-primary);
-  color: #111;
+  background: var(--cds-btn-primary-bg);
+  color: var(--cds-btn-primary-text);
   border-radius: var(--cds-radius-md);
   font-family: var(--cds-font-primary);
   font-size: 12px;
@@ -1093,7 +1172,7 @@ const InstallBannerBtn = styled.div`
   cursor: pointer;
   transition: background-color 120ms ease, transform 80ms ease;
   &:hover {
-    background: #e9ecef;
+    background: var(--cds-btn-primary-hover-bg);
   }
   &:active {
     transform: scale(0.98);
@@ -1156,7 +1235,7 @@ const ResourceTableHeader = styled.div`
   align-items: center;
   height: 36px;
   padding: 0 16px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--cds-table-header-bg);
   border-bottom: 1px solid var(--cds-border);
   font-family: var(--cds-font-primary);
   font-size: 12px;
@@ -1196,8 +1275,8 @@ const PrimaryBtn = styled.div`
   gap: 6px;
   height: 40px;
   padding: 0 16px;
-  background: var(--cds-text-primary);
-  color: #111;
+  background: var(--cds-btn-primary-bg);
+  color: var(--cds-btn-primary-text);
   border-radius: var(--cds-radius-md);
   font-family: var(--cds-font-primary);
   font-size: 14px;
@@ -1206,10 +1285,10 @@ const PrimaryBtn = styled.div`
   user-select: none;
   transition: background-color 120ms ease, transform 80ms ease;
   & svg {
-    color: #111;
+    color: var(--cds-btn-primary-text);
   }
   &:hover {
-    background: #e9ecef;
+    background: var(--cds-btn-primary-hover-bg);
   }
   &:active {
     transform: scale(0.98);
@@ -1612,7 +1691,7 @@ const GetApiKeyBtn = styled.div`
     color: var(--cds-hi-vis);
   }
   &:hover {
-    background: rgba(206, 235, 19, 0.08);
+    background: var(--cds-accent-tint);
   }
 `
 
@@ -1681,7 +1760,7 @@ const ProfilePanelWrap = styled.div`
   background: var(--cds-bg-panel);
   border: 1px solid var(--cds-border);
   border-radius: var(--cds-radius-lg);
-  box-shadow: 0px 2px 24px 0px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--cds-shadow-panel);
   padding: 8px;
   font-family: var(--cds-font-primary);
   animation: cdsPanelIn 140ms ease;
@@ -1839,7 +1918,7 @@ const NotifPanelWrap = styled.div`
   background: var(--cds-bg-panel);
   border: 1px solid var(--cds-border);
   border-radius: var(--cds-radius-lg);
-  box-shadow: 0px 2px 24px 0px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--cds-shadow-panel);
   font-family: var(--cds-font-primary);
   animation: cdsPanelIn 140ms ease;
   display: flex;
@@ -1925,7 +2004,7 @@ const NotifSeverity = styled.span`
     color: var(--cds-negative);
   }
   &[data-tone='warning'] svg {
-    color: #d3a13b;
+    color: var(--cds-warning);
   }
 `
 
@@ -2080,7 +2159,7 @@ const ProjectPanelWrap = styled.div`
   background: var(--cds-bg-panel);
   border: 1px solid var(--cds-border);
   border-radius: var(--cds-radius-lg);
-  box-shadow: 0px 2px 24px 0px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--cds-shadow-panel);
   font-family: var(--cds-font-primary);
   animation: cdsPanelIn 140ms ease;
   overflow: hidden;
