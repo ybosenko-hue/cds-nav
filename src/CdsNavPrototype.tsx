@@ -2197,7 +2197,7 @@ const ProjectPanelWrap = styled.div`
   /* Anchor to the right edge of the rail so it tracks collapse/expand. */
   left: calc(var(--cds-rail-width) - 12px);
   top: 88px;
-  width: 400px;
+  width: 280px;
   z-index: 100;
   background: var(--cds-bg-panel);
   border: 1px solid var(--cds-border);
